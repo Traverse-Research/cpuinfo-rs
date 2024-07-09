@@ -7,7 +7,7 @@ license = "MIT"
 homepage = "https://traverseresearch.nl"
 repository = "https://github.com/Traverse-Research/cpuinfo-rs"
 description = "Rust bindings for `cpuinfo`"
-include = ["src", "vendor", "examples", "LICENSE"]
+include = ["src", "vendor", "examples", "LICENSE", "build.rs"]
 categories = ["hardware-support"] # https://crates.io/category_slugs
 keywords = []
 
