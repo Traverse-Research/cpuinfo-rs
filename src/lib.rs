@@ -10,6 +10,12 @@ static INITIALIZED: Once = Once::new();
 
 pub struct CpuInfo;
 
+impl Default for CpuInfo {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl CpuInfo {
     pub fn new() -> Self {
         INITIALIZED.call_once(|| {

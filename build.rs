@@ -120,7 +120,7 @@ fn main() {
         .collect();
 
     for source_file in &source_files {
-        build.file(&source_file);
+        build.file(source_file);
     }
 
     if !build.get_compiler().is_like_msvc() {
