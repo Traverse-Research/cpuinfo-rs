@@ -30,3 +30,9 @@ jobs:
       - uses: dtolnay/rust-toolchain@1.74.0
       - name: Cargo check
         run: cargo check --workspace --all-targets
+      - name: Mini test
+        run: cargo run --example info
+      - uses: actions/upload-artifact@v4
+        with:
+          name: info.json
+          path: info.txt
