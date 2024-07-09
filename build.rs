@@ -80,7 +80,7 @@ const FREEBSD_X86_SRCS: &[&str] = &["src/x86/freebsd/init.c"];
 fn main() {
     let mut build = cc::Build::new();
 
-    let base = "vendor/cpuinfo/";
+    let base = "vendor/cpuinfo";
 
     build.include(format!("{base}/src"));
     build.include(format!("{base}/include"));
