@@ -87,11 +87,35 @@ fn main() {
 
     build.define("CPUINFO_LOG_LEVEL", "2");
 
-    // Add the files we build
-    let source_files: Vec<String> = COMMON_SRCS
+    let target = env::var("TARGET").unwrap();
+
+    // Tried to replicate this as much as possible from BUILD.bazel
+    #[rustfmt::skip]
+    let sources: &[&[&str]] = match target.as_str() {
+        "aarch64-apple-darwin" => &[COMMON_SRCS, MACH_SRCS, MACH_ARM_SRCS],
+        "aarch64-apple-ios" | "aarch64-apple-ios-sim" => &[COMMON_SRCS, MACH_SRCS, MACH_ARM_SRCS],
+        "aarch64-linux-android" => &[COMMON_SRCS, ARM_SRCS, LINUX_SRCS, LINUX_ARM_SRCS, LINUX_ARM64_SRCS, ANDROID_ARM_SRCS],
+        "aarch64-pc-windows-msvc" => &[COMMON_SRCS, ARM_SRCS, WINDOWS_ARM_SRCS],
+        "aarch64-unknown-linux-gnu" | "aarch64-unknown-linux-musl" => &[COMMON_SRCS, ARM_SRCS, LINUX_SRCS, LINUX_ARM_SRCS, LINUX_ARM64_SRCS],
+        "arm-unknown-linux-gnueabi" | "arm-unknown-linux-gnueabihf" => &[COMMON_SRCS, ARM_SRCS, LINUX_SRCS, LINUX_ARM_SRCS, LINUX_ARM32_SRCS],
+        "armv7-linux-androideabi" => &[COMMON_SRCS, ARM_SRCS, LINUX_SRCS, LINUX_ARM_SRCS, LINUX_ARM32_SRCS, ANDROID_ARM_SRCS],
+        "armv7-unknown-linux-gnueabihf" => &[COMMON_SRCS, ARM_SRCS, LINUX_SRCS, LINUX_ARM_SRCS, LINUX_ARM32_SRCS],
+        "i686-linux-android" => &[COMMON_SRCS, X86_SRCS, LINUX_SRCS, LINUX_X86_SRCS],
+        "riscv64gc-unknown-linux-gnu" => &[COMMON_SRCS, RISCV_SRCS, LINUX_SRCS, LINUX_RISCV_SRCS],
+        "s390x-unknown-linux-gnu" => &[COMMON_SRCS, LINUX_SRCS],
+        "thumbv7neon-linux-androideabi" => &[COMMON_SRCS, ARM_SRCS, LINUX_SRCS, LINUX_ARM_SRCS, LINUX_ARM32_SRCS, ANDROID_ARM_SRCS],
+        "x86_64-apple-darwin" => &[COMMON_SRCS, X86_SRCS, MACH_SRCS, MACH_X86_SRCS],
+        "x86_64-apple-ios" => &[COMMON_SRCS, X86_SRCS, MACH_SRCS, MACH_X86_SRCS],
+        "x86_64-linux-android" => &[COMMON_SRCS, X86_SRCS, LINUX_SRCS, LINUX_X86_SRCS],
+        "x86_64-pc-windows-msvc" | "x86_64-pc-windows-gnu" => &[COMMON_SRCS, X86_SRCS, WINDOWS_X86_SRCS],
+        "x86_64-unknown-freebsd" => &[COMMON_SRCS, X86_SRCS, FREEBSD_SRCS, FREEBSD_X86_SRCS],
+        "x86_64-unknown-linux-gnu" | "x86_64-unknown-linux-musl" => &[COMMON_SRCS, X86_SRCS, LINUX_SRCS, LINUX_X86_SRCS],
+        _ => panic!("Unsupported platform {target}"),
+    };
+
+    let source_files: Vec<String> = sources
         .iter()
-        .chain(X86_SRCS.iter())
-        .chain(WINDOWS_X86_SRCS.iter())
+        .flat_map(|i| i.iter())
         .map(|s| format!("{base}/{s}"))
         .collect();
 
@@ -99,21 +123,14 @@ fn main() {
         build.file(&source_file);
     }
 
-    let target = env::var("TARGET").unwrap();
-    // if target.contains("darwin") {
-    //     build
-    //         .flag("-std=c++11")
-    //         .flag("-Wno-missing-field-initializers")
-    //         .flag("-Wno-sign-compare")
-    //         .flag("-Wno-deprecated")
-    //         .cpp_link_stdlib("c++")
-    //         .cpp_set_stdlib("c++")
-    //         .cpp(true);
-    // } else if target.contains("linux") {
-    //     build.flag("-std=c++11").cpp_link_stdlib("stdc++").cpp(true);
-    // }
-
-    // build.debug(false).flag("-DNDEBUG").cpp(true);
+    if !build.get_compiler().is_like_msvc() {
+        build
+            .flag("-std=gnu99")
+            .flag("-Wno-vla")
+            .flag("-D_GNU_SOURCE=1")
+            .flag("-DCPUINFO_INTERNAL=")
+            .flag("-DCPUINFO_PRIVATE=");
+    }
 
     build.compile("cpuinfo");
 
@@ -125,8 +142,8 @@ fn main() {
 fn generate_bindings(output_file: &str) {
     let bindings = bindgen::Builder::default()
         .header("vendor/cpuinfo/include/cpuinfo.h")
-        .enable_cxx_namespaces()
-        .rustfmt_bindings(true)
+        .raw_line("#![allow(non_upper_case_globals, non_snake_case, non_camel_case_types)]")
+        .raw_line("#![allow(dead_code)]")
         .clang_args(&["-xc++", "-std=c++11"])
         .layout_tests(false)
         .generate()
