@@ -10,7 +10,7 @@
 
 [![Banner](banner.png)](https://traverseresearch.nl)
 
-TODO: Write a description
+Thin and slightly opinionated wrapper around [cpuinfo](https://github.com/pytorch/cpuinfo).
 
 ## Usage
 
@@ -18,9 +18,10 @@ Add this to your Cargo.toml:
 
 ```toml
 [dependencies]
-rust-template = "0.0.0"
+cpuinfo-rs = "0.1.0"
 ```
 
 ```rust
-// A code example
+let info = CpuInfo::new();
+dbg!(info.processors());
 ```
