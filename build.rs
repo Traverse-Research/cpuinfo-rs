@@ -80,7 +80,7 @@ const FREEBSD_X86_SRCS: &[&str] = &["src/x86/freebsd/init.c"];
 fn main() {
     let mut build = cc::Build::new();
 
-    let base = "c:/users/jasper/cpuinfo/";
+    let base = "vendor/cpuinfo/";
 
     build.include(format!("{base}/src"));
     build.include(format!("{base}/include"));
@@ -124,7 +124,7 @@ fn main() {
 #[cfg(feature = "generate_bindings")]
 fn generate_bindings(output_file: &str) {
     let bindings = bindgen::Builder::default()
-        .header("c:/users/jasper/cpuinfo/include/cpuinfo.h")
+        .header("vendor/cpuinfo/include/cpuinfo.h")
         .enable_cxx_namespaces()
         .rustfmt_bindings(true)
         .clang_args(&["-xc++", "-std=c++11"])
