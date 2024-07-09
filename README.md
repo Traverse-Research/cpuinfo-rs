@@ -20,6 +20,8 @@ cpuinfo-rs = "0.1.0"
 ```
 
 ```rust
+use cpuinfo_rs::CpuInfo;
+
 let info = CpuInfo::new();
 dbg!(info.processors());
 ```
