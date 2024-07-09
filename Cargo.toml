@@ -3,19 +3,14 @@ name = "cpuinfo-rs"
 version = "0.1.0"
 authors = ["Traverse Research <support@traverseresearch.nl>"]
 edition = "2021"
-license = "MIT"
-homepage = "https://traverseresearch.nl"
-repository = "https://github.com/Traverse-Research/cpuinfo-rs"
-description = "A useful description"
-include = ["src", "LICENSE"]
-categories = [] # https://crates.io/category_slugs
-keywords = []
 
 [features]
 generate_bindings = ["dep:bindgen"]
 
 [dependencies]
 bytemuck = "1"
+serde = { version = "1", features = ["derive", "rc"] }
+
 [build-dependencies]
 bindgen = { version = "0.69", optional = true }
 cc = "1.0.83"

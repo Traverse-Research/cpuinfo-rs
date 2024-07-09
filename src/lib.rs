@@ -3,6 +3,7 @@
 mod bindings;
 use bindings::*;
 
+use std::borrow::Cow;
 use std::sync::{Arc, Once};
 
 static INITIALIZED: Once = Once::new();
@@ -21,7 +22,7 @@ impl CpuInfo {
     fn uarch(uarch: cpuinfo_uarch) -> Uarch {
         Uarch {
             uarch,
-            name: uarch_to_string(uarch),
+            name: uarch_to_string(uarch).into(),
         }
     }
 
@@ -84,7 +85,7 @@ impl CpuInfo {
     fn vendor(vendor: cpuinfo_vendor) -> Vendor {
         Vendor {
             vendor,
-            name: vendor_to_string(vendor),
+            name: vendor_to_string(vendor).into(),
         }
     }
 
@@ -181,7 +182,7 @@ impl CpuInfo {
 }
 
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Cache {
     #[doc = " Cache size in bytes"]
     pub size: u32,
@@ -201,7 +202,7 @@ pub struct Cache {
     pub processor_count: u32,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Processor {
     #[doc = " SMT (hyperthread) ID within a core"]
     pub smt_id: u32,
@@ -221,7 +222,7 @@ pub struct Processor {
 }
 
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct CacheInfo {
     #[doc = " Level 1 instruction cache"]
     pub l1i: Option<Cache>,
@@ -235,13 +236,13 @@ pub struct CacheInfo {
     pub l4: Option<Cache>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Vendor {
     pub vendor: cpuinfo_vendor,
-    pub name: &'static str,
+    pub name: Cow<'static, str>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Core {
     #[doc = " Index of the first logical processor on this core."]
     pub processor_start: u32,
@@ -263,7 +264,7 @@ pub struct Core {
     pub frequency: u64,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Cluster {
     #[doc = " Index of the first logical processor in the cluster"]
     pub processor_start: u32,
@@ -287,7 +288,7 @@ pub struct Cluster {
     pub frequency: u64,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Package {
     #[doc = " SoC or processor chip model name"]
     pub name: String,
@@ -305,16 +306,16 @@ pub struct Package {
     pub cluster_count: u32,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Uarch {
     #[doc = " Type of CPU microarchitecture"]
     pub uarch: cpuinfo_uarch,
 
     #[doc = " Type of CPU microarchitecture as text"]
-    pub name: &'static str,
+    pub name: Cow<'static, str>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct UarchInfo {
     #[doc = " Type of CPU microarchitecture"]
     pub uarch: Uarch,
