@@ -2,3 +2,7 @@
 # Workaround for https://github.com/cross-rs/cross/issues/1128
 # and https://github.com/rust-lang/rust/issues/103673
 image = "ghcr.io/cross-rs/aarch64-linux-android:edge"
+
+[target.aarch64-pc-windows-msvc]
+# Cannot be hosted, must be built locally: https://github.com/cross-rs/cross-toolchains/issues/32
+image = "ghcr.io/cross-rs/aarch64-pc-windows-msvc-cross:local"

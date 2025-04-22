@@ -45,48 +45,54 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - target: x86_64-unknown-linux-gnu
-            os: ubuntu-latest
-            name: Linux
+          - os: ubuntu-latest
+            name: Linux AMD64
+            target: x86_64-unknown-linux-gnu
             cross: false
             test: true
 
-          - target: x86_64-apple-darwin
-            os: macos-latest
+          - os: macos-latest
             name: macOS
+            target: x86_64-apple-darwin
             cross: false
             test: true
 
           - os: windows-latest
-            name: Windows
+            name: Windows AMD64
             target: x86_64-pc-windows-msvc
             cross: false
             test: true
 
+          - os: windows-latest
+            name: Windows AARCH64
+            target: aarch64-pc-windows-msvc
+            cross: true
+            test: true
+
+          # Disabled because u_int is undefined in freebsd headers
           # - os: ubuntu-latest
           #   name: FreeBSD
           #   target: x86_64-unknown-freebsd
           #   cross: true
           #   test: false
 
-          - target: aarch64-linux-android
-            os: ubuntu-latest
+          - os: ubuntu-latest
             name: Android
+            target: aarch64-linux-android
             cross: true
             test: true
 
-          # - os: ubuntu-latest
-          #   name: OpenWrt
-          #   target: aarch64-unknown-linux-gnu
-          #   cross: true
-          #   test: true
-          #   cargo_args: --features "openwrt"
+          - os: ubuntu-latest
+            name: Linux AARCH64
+            target: aarch64-unknown-linux-gnu
+            cross: true
+            test: true
 
-          # - target: armv7-unknown-linux-gnueabihf
-          #   os: ubuntu-latest
-          #   name: Linux ARMv7
-          #   cross: true
-          #   test: true
+          - os: ubuntu-latest
+            name: Linux ARMv7
+            target: armv7-unknown-linux-gnueabihf
+            cross: true
+            test: true
 
     steps:
       - name: Checkout
@@ -100,19 +106,35 @@ jobs:
           targets: ${{ matrix.target }}
 
       - name: Install cross
-        run: cargo install cross
+        # Install the latest from-source version because the ancient
+        # v0.2.5 release (>2 years old) doesn't seem to recognize the
+        # aarch64-pc-windows-msvc target as needing the docker image to
+        # cross-compile and run tests on.
+        run: cargo install cross --git https://github.com/cross-rs/cross
         if: ${{ matrix.cross }}
 
+      - name: Build aarch64-pc-windows-msvc Docker image
+        # https://github.com/cross-rs/cross-toolchains/issues/32
+        if: ${{ matrix.target == 'aarch64-pc-windows-msvc' }}
+        run: |
+          # https://github.com/cross-rs/cross/pull/1672
+          git clone https://github.com/cross-rs/cross --recurse-submodules --revision 359863badc32b9b2995d304b8ef74a36a426488f
+          cd cross
+          # cargo xtask configure-crosstool ${{ matrix.target }}
+          cargo build-docker-image --platform windows/amd64 ${{ matrix.target }}-cross --tag local
+
       - name: Build
-        run: ${{ env.PROGRAM }} build --target=${{ matrix.target }} ${{ matrix.cargo_args }}
+        run: ${{ env.PROGRAM }} build --target=${{ matrix.target }}
 
       - name: Test
-        run: ${{ env.PROGRAM }} test --target=${{ matrix.target }} ${{ matrix.cargo_args }}
+        run: ${{ env.PROGRAM }} test --target=${{ matrix.target }}
         if: ${{ matrix.test }}
       
       - name: Run example
+        if: ${{ !matrix.cross }}
         run: cargo run --example info
       - uses: actions/upload-artifact@v4
+        if: ${{ !matrix.cross }}
         with:
           name: info-${{ matrix.target }}
           path: info.txt
