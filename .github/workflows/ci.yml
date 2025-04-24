@@ -29,6 +29,9 @@ jobs:
       - uses: dtolnay/rust-toolchain@nightly
       - name: Generate minimal-version dependencies
         run: cargo -Zminimal-versions generate-lockfile
+      # The latest bindgen release has an underspecified proc-macro2 dependency: https://github.com/rust-lang/rust-bindgen/issues/3149
+      - name: Update proc-macro2 to 1.0.80
+        run: cargo update -p proc-macro2 --precise 1.0.80
       - uses: dtolnay/rust-toolchain@1.74.0
       - name: Cargo check
         run: cargo check --workspace --all-targets
