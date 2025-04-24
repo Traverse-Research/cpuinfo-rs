@@ -77,6 +77,19 @@ const MACH_ARM_SRCS: &[&str] = &["src/arm/mach/init.c"];
 
 const FREEBSD_X86_SRCS: &[&str] = &["src/x86/freebsd/init.c"];
 
+/// Targets for which bindings will be generated.
+const BINDGEN_SUPPORTED_TARGETS: &[&str] = &[
+    "x86_64-unknown-linux-gnu",
+    // "x86_64-apple-darwin",
+    "x86_64-pc-windows-msvc",
+    "x86_64-unknown-freebsd",
+    "aarch64-linux-android",
+    "aarch64-unknown-linux-gnu",
+    "aarch64-pc-windows-msvc",
+    // "aarch64-apple-darwin",
+    "armv7-unknown-linux-gnueabihf",
+];
+
 fn main() {
     let mut build = cc::Build::new();
 
@@ -134,25 +147,30 @@ fn main() {
 
     build.compile("cpuinfo");
 
-    #[cfg(feature = "generate_bindings")]
-    generate_bindings("src/bindings.rs")
+    generate_bindings();
 }
 
 #[cfg(feature = "generate_bindings")]
-fn generate_bindings(output_file: &str) {
-    let bindings = bindgen::Builder::default()
-        .header("vendor/cpuinfo/include/cpuinfo.h")
-        .raw_line("#![allow(non_upper_case_globals, non_snake_case, non_camel_case_types)]")
-        .raw_line("#![allow(dead_code)]")
-        .clang_args(&["-xc++", "-std=c++11"])
-        .layout_tests(false)
-        .generate()
-        .expect("Unable to generate bindings!");
+fn generate_bindings() {
+    for target in BINDGEN_SUPPORTED_TARGETS {
+        let t = target.replace("-", "_");
+        let output_file = format!("src/bindings_{t}.rs");
 
-    bindings
-        .write_to_file(std::path::Path::new(output_file))
-        .expect("Unable to write bindings!");
+        let bindings = bindgen::Builder::default()
+            .header("vendor/cpuinfo/include/cpuinfo.h")
+            .raw_line("#![allow(non_upper_case_globals, non_snake_case, non_camel_case_types)]")
+            .raw_line("#![allow(dead_code)]")
+            .clang_arg(format!("--target={target}"))
+            .clang_args(&["-xc++", "-std=c++11"])
+            .layout_tests(false)
+            .generate()
+            .expect("Unable to generate bindings!");
+
+        bindings
+            .write_to_file(std::path::Path::new(&output_file))
+            .expect("Unable to write bindings!");
+    }
 }
 
 #[cfg(not(feature = "generate_bindings"))]
-fn generate_bindings(_: &str) {}
+fn generate_bindings() {}
