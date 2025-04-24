@@ -146,30 +146,28 @@ fn main() {
 
     build.compile("cpuinfo");
 
-    generate_bindings();
+    generate_bindings(&target);
 }
 
 #[cfg(feature = "generate_bindings")]
-fn generate_bindings() {
-    for target in BINDGEN_SUPPORTED_TARGETS {
-        let t = target.replace("-", "_");
-        let output_file = format!("src/bindings_{t}.rs");
+fn generate_bindings(target: &str) {
+    let t = target.replace("-", "_");
+    let output_file = format!("src/bindings_{t}.rs");
 
-        let bindings = bindgen::Builder::default()
-            .header("vendor/cpuinfo/include/cpuinfo.h")
-            .raw_line("#![allow(non_upper_case_globals, non_snake_case, non_camel_case_types)]")
-            .raw_line("#![allow(dead_code)]")
-            .clang_arg(format!("--target={target}"))
-            .clang_args(&["-xc++", "-std=c++11"])
-            .layout_tests(false)
-            .generate()
-            .expect("Unable to generate bindings!");
+    let bindings = bindgen::Builder::default()
+        .header("vendor/cpuinfo/include/cpuinfo.h")
+        .raw_line("#![allow(non_upper_case_globals, non_snake_case, non_camel_case_types)]")
+        .raw_line("#![allow(dead_code)]")
+        .clang_arg(format!("--target={target}"))
+        .clang_args(&["-xc++", "-std=c++11"])
+        .layout_tests(false)
+        .generate()
+        .expect("Unable to generate bindings!");
 
-        bindings
-            .write_to_file(std::path::Path::new(&output_file))
-            .expect("Unable to write bindings!");
-    }
+    bindings
+        .write_to_file(std::path::Path::new(&output_file))
+        .expect("Unable to write bindings!");
 }
 
 #[cfg(not(feature = "generate_bindings"))]
-fn generate_bindings() {}
+fn generate_bindings(_: &str) {}
