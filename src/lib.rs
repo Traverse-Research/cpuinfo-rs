@@ -327,7 +327,7 @@ pub struct Core {
     pub uarch: Uarch,
     #[doc = " Value of CPUID leaf 1 EAX register for this core (x86-specific ID)"]
     pub cpuid: Option<u32>,
-    #[doc = " Value of Main ID Register (MIDR) for this core (arm-specific ID)"]
+    #[doc = " Value of Main ID Register (MIDR) for this core (arm/aarch64-specific ID)"]
     pub midr: Option<u32>,
     #[doc = " Clock rate (non-Turbo) of the core, in Hz"]
     pub frequency: u64,
