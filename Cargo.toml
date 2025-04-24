@@ -10,6 +10,7 @@ description = "Rust bindings for `cpuinfo`"
 include = ["src", "vendor", "examples", "LICENSE", "build.rs"]
 categories = ["hardware-support"] # https://crates.io/category_slugs
 keywords = []
+rust-version = "1.74"
 
 [features]
 generate_bindings = ["dep:bindgen"]
@@ -23,4 +24,4 @@ serde_json = "1"
 
 [build-dependencies]
 bindgen = { version = "0.69", optional = true }
-cc = "1.1.0"
+cc = "1.1"
