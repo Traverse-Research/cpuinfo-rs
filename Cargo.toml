@@ -11,9 +11,6 @@ include = ["src", "vendor", "examples", "LICENSE", "build.rs"]
 categories = ["hardware-support"] # https://crates.io/category_slugs
 keywords = []
 
-[features]
-generate_bindings = ["dep:bindgen"]
-
 [dependencies]
 bytemuck = "1"
 serde = { version = "1", features = ["derive", "rc"] }
@@ -22,5 +19,5 @@ serde = { version = "1", features = ["derive", "rc"] }
 serde_json = "1"
 
 [build-dependencies]
-bindgen = { version = "0.69", optional = true }
+bindgen = { version = "0.69" }
 cc = "1.1.0"

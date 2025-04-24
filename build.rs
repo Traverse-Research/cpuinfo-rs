@@ -146,28 +146,20 @@ fn main() {
 
     build.compile("cpuinfo");
 
-    generate_bindings(&target);
+    generate_bindings("src/bindings.rs");
 }
 
-#[cfg(feature = "generate_bindings")]
-fn generate_bindings(target: &str) {
-    let t = target.replace("-", "_");
-    let output_file = format!("src/bindings_{t}.rs");
-
+fn generate_bindings(output_file: &str) {
     let bindings = bindgen::Builder::default()
         .header("vendor/cpuinfo/include/cpuinfo.h")
         .raw_line("#![allow(non_upper_case_globals, non_snake_case, non_camel_case_types)]")
         .raw_line("#![allow(dead_code)]")
-        .clang_arg(format!("--target={target}"))
         .clang_args(&["-xc++", "-std=c++11"])
         .layout_tests(false)
         .generate()
         .expect("Unable to generate bindings!");
 
     bindings
-        .write_to_file(std::path::Path::new(&output_file))
+        .write_to_file(std::path::Path::new(output_file))
         .expect("Unable to write bindings!");
 }
-
-#[cfg(not(feature = "generate_bindings"))]
-fn generate_bindings(_: &str) {}
