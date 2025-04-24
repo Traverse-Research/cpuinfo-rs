@@ -71,9 +71,20 @@ impl CpuInfo {
         for i in 0..count {
             let uarch_info = unsafe { cpuinfo_get_uarch(i) };
             infos.push(unsafe {
+                #[cfg(target_arch = "x86_64")]
+                let cpuid = Some((*uarch_info).cpuid);
+                #[cfg(not(target_arch = "x86_64"))]
+                let cpuid = None;
+
+                #[cfg(target_arch = "aarch64")]
+                let midr = Some((*uarch_info).midr);
+                #[cfg(not(target_arch = "aarch64"))]
+                let midr = None;
+
                 UarchInfo {
                     uarch: Self::uarch((*uarch_info).uarch),
-                    cpuid: (*uarch_info).cpuid,
+                    cpuid,
+                    midr,
                     processor_count: (*uarch_info).processor_count,
                     core_count: (*uarch_info).core_count,
                 }
@@ -140,17 +151,10 @@ impl CpuInfo {
 
     fn core(core: *const cpuinfo_core, cluster: Arc<Cluster>, package: Arc<Package>) -> Arc<Core> {
         Arc::new(unsafe {
-            #[cfg(target_arch = "x86_64")]
-            let cpuid = (*cluster).cpuid;
-            #[cfg(not(target_arch = "x86_64"))]
-            let cpuid = None;
-
-            #[cfg(target_arch = "aarch64")]
-            let midr = (*cluster).midr;
-            #[cfg(not(target_arch = "aarch64"))]
-            let midr = None;
-
             Core {
+                cpuid: cluster.cpuid,
+                midr: cluster.midr,
+
                 processor_start: (*core).processor_start,
                 processor_count: (*core).processor_count,
                 core_id: (*core).core_id,
@@ -158,8 +162,6 @@ impl CpuInfo {
                 package,
                 vendor: Self::vendor((*core).vendor),
                 uarch: Self::uarch((*core).uarch),
-                cpuid,
-                midr,
                 frequency: (*core).frequency,
             }
         })
@@ -407,7 +409,9 @@ pub struct UarchInfo {
     #[doc = " Type of CPU microarchitecture"]
     pub uarch: Uarch,
     #[doc = " Value of CPUID leaf 1 EAX register for the microarchitecture"]
-    pub cpuid: u32,
+    pub cpuid: Option<u32>,
+    #[doc = " Value of Main ID Register (MIDR) for this core (arm-specific ID)"]
+    pub midr: Option<u32>,
     #[doc = " Number of logical processors with the microarchitecture"]
     pub processor_count: u32,
     #[doc = " Number of cores with the microarchitecture"]
