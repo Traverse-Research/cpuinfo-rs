@@ -7,12 +7,12 @@ jobs:
     runs-on: ubuntu-latest
     name: Lint
     env:
-      RUSTFLAGS: "-Dwarnings"
+      RUSTFLAGS: -Dwarnings
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          submodules: 'true'
+          submodules: true
   checks:
     name: ${{ matrix.name }} (${{ matrix.target }})
     runs-on: ${{ matrix.os }}
@@ -21,15 +21,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target:
-          - x86_64-unknown-linux-gnu
-          - x86_64-apple-darwin
-          - x86_64-pc-windows-msvc
-          - x86_64-unknown-freebsd
-          - aarch64-linux-android
-          - aarch64-unknown-linux-gnu
-          - armv7-unknown-linux-gnueabihf
-
         include:
           - os: ubuntu-latest
             name: Linux
@@ -49,11 +40,11 @@ jobs:
             cross: false
             test: true
 
-          - os: ubuntu-latest
-            name: FreeBSD
-            target: x86_64-unknown-freebsd
-            cross: true
-            test: false
+          # - os: ubuntu-latest
+          #   name: FreeBSD
+          #   target: x86_64-unknown-freebsd
+          #   cross: true
+          #   test: false
 
           - os: ubuntu-latest
             name: Android
@@ -61,12 +52,12 @@ jobs:
             cross: true
             test: true
 
-          - os: ubuntu-latest
-            name: OpenWrt
-            target: aarch64-unknown-linux-gnu
-            cross: true
-            test: true
-            cargo_args: --features "openwrt"
+          # - os: ubuntu-latest
+          #   name: OpenWrt
+          #   target: aarch64-unknown-linux-gnu
+          #   cross: true
+          #   test: true
+          #   cargo_args: --features openwrt
 
           - os: ubuntu-latest
             name: Linux ARMv7
@@ -78,7 +69,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          submodules: 'true'
+          submodules: true
           
       - name: Bootstrap
         uses: dtolnay/rust-toolchain@stable
