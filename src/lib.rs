@@ -88,17 +88,17 @@ impl CpuInfo {
     }
 
     fn cluster(cluster: *const cpuinfo_cluster, package: Arc<Package>) -> Arc<Cluster> {
+        #[cfg(target_arch = "x86_64")]
+        let cpuid = Some(unsafe { (*cluster).cpuid });
+        #[cfg(not(target_arch = "x86_64"))]
+        let cpuid = None;
+
+        #[cfg(target_arch = "aarch64")]
+        let midr = Some(unsafe { (*cluster).midr });
+        #[cfg(not(target_arch = "aarch64"))]
+        let midr = None;
+
         Arc::new(unsafe {
-            #[cfg(target_arch = "x86_64")]
-            let cpuid = Some((*cluster).cpuid);
-            #[cfg(not(target_arch = "x86_64"))]
-            let cpuid = None;
-
-            #[cfg(target_arch = "aarch64")]
-            let midr = Some((*cluster).midr);
-            #[cfg(not(target_arch = "aarch64"))]
-            let midr = None;
-
             Cluster {
                 processor_start: (*cluster).processor_start,
                 processor_count: (*cluster).processor_count,
@@ -123,11 +123,18 @@ impl CpuInfo {
     }
 
     fn core(core: *const cpuinfo_core, cluster: Arc<Cluster>, package: Arc<Package>) -> Arc<Core> {
+        #[cfg(target_arch = "x86_64")]
+        let cpuid = Some(unsafe { (*core).cpuid });
+        #[cfg(not(target_arch = "x86_64"))]
+        let cpuid = None;
+
+        #[cfg(target_arch = "aarch64")]
+        let midr = Some(unsafe { (*core).midr });
+        #[cfg(not(target_arch = "aarch64"))]
+        let midr = None;
+
         Arc::new(unsafe {
             Core {
-                cpuid: cluster.cpuid,
-                midr: cluster.midr,
-
                 processor_start: (*core).processor_start,
                 processor_count: (*core).processor_count,
                 core_id: (*core).core_id,
@@ -135,6 +142,8 @@ impl CpuInfo {
                 package,
                 vendor: Self::vendor((*core).vendor),
                 uarch: Self::uarch((*core).uarch),
+                cpuid,
+                midr,
                 frequency: (*core).frequency,
             }
         })
@@ -198,27 +207,27 @@ impl CpuInfo {
                 package.clone(),
             );
 
+            #[cfg(target_os = "linux")]
+            let linux_id = Some(unsafe { (*processor).linux_id });
+            #[cfg(not(target_os = "linux"))]
+            let linux_id = None;
+
+            #[cfg(target_os = "windows")]
+            let (windows_group_id, windows_processor_id) = {
+                (
+                    Some(unsafe { (*processor).windows_group_id }),
+                    Some(unsafe { (*processor).windows_processor_id }),
+                )
+            };
+            #[cfg(not(target_os = "windows"))]
+            let (windows_group_id, windows_processor_id) = (None, None);
+
+            #[cfg(target_arch = "x86_64")]
+            let apic_id = Some(unsafe { (*processor).apic_id });
+            #[cfg(not(target_arch = "x86_64"))]
+            let apic_id = None;
+
             processors.push(unsafe {
-                #[cfg(target_os = "linux")]
-                let linux_id = Some((*processor).linux_id);
-                #[cfg(not(target_os = "linux"))]
-                let linux_id = None;
-
-                #[cfg(target_os = "windows")]
-                let (windows_group_id, windows_processor_id) = {
-                    (
-                        Some((*processor).windows_group_id),
-                        Some((*processor).windows_processor_id),
-                    )
-                };
-                #[cfg(not(target_os = "windows"))]
-                let (windows_group_id, windows_processor_id) = (None, None);
-
-                #[cfg(target_arch = "x86_64")]
-                let apic_id = Some((*processor).apic_id);
-                #[cfg(not(target_arch = "x86_64"))]
-                let apic_id = None;
-
                 Processor {
                     smt_id: (*processor).smt_id,
                     core,
