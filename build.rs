@@ -141,10 +141,15 @@ fn generate_bindings() {
     let dest = std::env::var("OUT_DIR").unwrap();
     let dest = std::path::Path::new(&dest).join("bindings.rs");
 
+    let Ok(version) = bindgen::RustTarget::stable(74, 0) else {
+        panic!("Invalid rust target version");
+    };
+
     let bindings = bindgen::Builder::default()
         .header("vendor/cpuinfo/include/cpuinfo.h")
         .clang_args(&["-xc++", "-std=c++11"])
         .layout_tests(false)
+        .rust_target(version)
         .generate()
         .expect("Unable to generate bindings!");
 
