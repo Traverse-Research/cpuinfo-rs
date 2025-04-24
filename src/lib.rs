@@ -44,14 +44,14 @@ impl CpuInfo {
         for i in 0..count {
             let uarch_info = unsafe { cpuinfo_get_uarch(i) };
             infos.push(unsafe {
-                #[cfg(target_arch = "x86_64")]
+                #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
                 let cpuid = Some((*uarch_info).cpuid);
-                #[cfg(not(target_arch = "x86_64"))]
+                #[cfg(all(not(target_arch = "x86_64"), not(target_arch = "x86")))]
                 let cpuid = None;
 
-                #[cfg(target_arch = "aarch64")]
+                #[cfg(any(target_arch = "aarch64", target_arch = "arm"))]
                 let midr = Some((*uarch_info).midr);
-                #[cfg(not(target_arch = "aarch64"))]
+                #[cfg(all(not(target_arch = "aarch64"), not(target_arch = "arm")))]
                 let midr = None;
 
                 UarchInfo {
@@ -88,14 +88,14 @@ impl CpuInfo {
     }
 
     fn cluster(cluster: *const cpuinfo_cluster, package: Arc<Package>) -> Arc<Cluster> {
-        #[cfg(target_arch = "x86_64")]
+        #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
         let cpuid = Some(unsafe { (*cluster).cpuid });
-        #[cfg(not(target_arch = "x86_64"))]
+        #[cfg(all(not(target_arch = "x86_64"), not(target_arch = "x86")))]
         let cpuid = None;
 
-        #[cfg(target_arch = "aarch64")]
+        #[cfg(any(target_arch = "aarch64", target_arch = "arm"))]
         let midr = Some(unsafe { (*cluster).midr });
-        #[cfg(not(target_arch = "aarch64"))]
+        #[cfg(all(not(target_arch = "aarch64"), not(target_arch = "arm")))]
         let midr = None;
 
         Arc::new(unsafe {
@@ -123,14 +123,14 @@ impl CpuInfo {
     }
 
     fn core(core: *const cpuinfo_core, cluster: Arc<Cluster>, package: Arc<Package>) -> Arc<Core> {
-        #[cfg(target_arch = "x86_64")]
+        #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
         let cpuid = Some(unsafe { (*core).cpuid });
-        #[cfg(not(target_arch = "x86_64"))]
+        #[cfg(all(not(target_arch = "x86_64"), not(target_arch = "x86")))]
         let cpuid = None;
 
-        #[cfg(target_arch = "aarch64")]
+        #[cfg(any(target_arch = "aarch64", target_arch = "arm"))]
         let midr = Some(unsafe { (*core).midr });
-        #[cfg(not(target_arch = "aarch64"))]
+        #[cfg(all(not(target_arch = "aarch64"), not(target_arch = "arm")))]
         let midr = None;
 
         Arc::new(unsafe {
@@ -222,9 +222,9 @@ impl CpuInfo {
             #[cfg(not(target_os = "windows"))]
             let (windows_group_id, windows_processor_id) = (None, None);
 
-            #[cfg(target_arch = "x86_64")]
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
             let apic_id = Some(unsafe { (*processor).apic_id });
-            #[cfg(not(target_arch = "x86_64"))]
+            #[cfg(all(not(target_arch = "x86_64"), not(target_arch = "x86")))]
             let apic_id = None;
 
             processors.push(unsafe {
