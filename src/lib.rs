@@ -5,6 +5,11 @@ mod bindings_aarch64_linux_android;
 #[cfg(all(target_arch = "aarch64", target_os = "android"))]
 use bindings_aarch64_linux_android::*;
 
+#[cfg(all(target_arch = "aarch64", target_os = "macos"))]
+mod bindings_aarch64_apple_darwin;
+#[cfg(all(target_arch = "aarch64", target_os = "macos"))]
+use bindings_aarch64_apple_darwin::*;
+
 #[cfg(all(target_arch = "aarch64", target_os = "windows", target_env = "msvc"))]
 mod bindings_aarch64_pc_windows_msvc;
 #[cfg(all(target_arch = "aarch64", target_os = "windows", target_env = "msvc"))]
@@ -15,25 +20,25 @@ mod bindings_aarch64_unknown_linux_gnu;
 #[cfg(all(target_arch = "aarch64", target_os = "linux", target_env = "gnu"))]
 use bindings_aarch64_unknown_linux_gnu::*;
 
-#[cfg(all(target_arch = "arm", target_os = "linux", target_env = "gnu"))]
-mod bindings_armv7_unknown_linux_gnueabihf;
-#[cfg(all(target_arch = "arm", target_os = "linux", target_env = "gnu"))]
-use bindings_armv7_unknown_linux_gnueabihf::*;
-
 #[cfg(all(target_arch = "x86_64", target_os = "windows", target_env = "msvc"))]
 mod bindings_x86_64_pc_windows_msvc;
 #[cfg(all(target_arch = "x86_64", target_os = "windows", target_env = "msvc"))]
 use bindings_x86_64_pc_windows_msvc::*;
 
-#[cfg(all(target_arch = "x86_64", target_os = "freebsd"))]
-mod bindings_x86_64_unknown_freebsd;
-#[cfg(all(target_arch = "x86_64", target_os = "freebsd"))]
-use bindings_x86_64_unknown_freebsd::*;
-
 #[cfg(all(target_arch = "x86_64", target_os = "linux", target_env = "gnu"))]
 mod bindings_x86_64_unknown_linux_gnu;
 #[cfg(all(target_arch = "x86_64", target_os = "linux", target_env = "gnu"))]
 use bindings_x86_64_unknown_linux_gnu::*;
+
+#[cfg(all(target_arch = "x86_64", target_os = "macos"))]
+mod bindings_x86_64_apple_darwin;
+#[cfg(all(target_arch = "x86_64", target_os = "macos"))]
+use bindings_x86_64_apple_darwin::*;
+
+#[cfg(all(target_arch = "arm", target_os = "linux", target_env = "gnu"))]
+mod bindings_armv7_unknown_linux_gnueabihf;
+#[cfg(all(target_arch = "arm", target_os = "linux", target_env = "gnu"))]
+use bindings_armv7_unknown_linux_gnueabihf::*;
 
 use std::borrow::Cow;
 use std::sync::{Arc, Once};
