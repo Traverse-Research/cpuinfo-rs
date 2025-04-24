@@ -20,7 +20,7 @@ jobs:
     name: Build-test MSRV (1.74) with minimal crate dependencies
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest, macos-12, macos-13]
+        os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
