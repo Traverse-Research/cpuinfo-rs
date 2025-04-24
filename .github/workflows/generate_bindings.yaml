@@ -2,6 +2,7 @@ name: Generate Bindings
 
 on:
   workflow_dispatch:
+  push:
 
 jobs:
   generate:
