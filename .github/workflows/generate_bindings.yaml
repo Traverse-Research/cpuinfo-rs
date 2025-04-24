@@ -34,7 +34,7 @@ jobs:
 
           - target: armv7-unknown-linux-gnueabihf
             os: ubuntu-latest
-            
+
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -54,7 +54,7 @@ jobs:
   zip:
     name: Zip bindings
     needs: [generate]
-    runs_on: ubuntu-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Download x86_64-unknown-linux-gnu bindings
