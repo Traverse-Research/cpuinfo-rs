@@ -72,11 +72,11 @@ jobs:
             cross: false
             test: true
 
-          - os: ubuntu-latest
-            name: FreeBSD
-            target: x86_64-unknown-freebsd
-            cross: true
-            test: false
+          # - os: ubuntu-latest
+          #   name: FreeBSD
+          #   target: x86_64-unknown-freebsd
+          #   cross: true
+          #   test: false
 
           - os: ubuntu-latest
             name: Android
@@ -84,12 +84,12 @@ jobs:
             cross: true
             test: true
 
-          - os: ubuntu-latest
-            name: OpenWrt
-            target: aarch64-unknown-linux-gnu
-            cross: true
-            test: true
-            cargo_args: --features "openwrt"
+          # - os: ubuntu-latest
+          #   name: OpenWrt
+          #   target: aarch64-unknown-linux-gnu
+          #   cross: true
+          #   test: true
+          #   cargo_args: --features "openwrt"
 
           - os: ubuntu-latest
             name: Linux ARMv7

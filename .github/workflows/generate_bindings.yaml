@@ -1,0 +1,107 @@
+name: Generate Bindings
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate:
+    name: Generate bindings
+    strategy:
+      include:
+        - target: x86_64-unknown-linux-gnu
+          path: x86_64_unknown_linux_gnu
+          os: ubuntu-latest
+
+        - target: x86_64-apple-darwin
+          os: macos-latest
+
+        - target: x86_64-pc-windows-msvc
+          os: ubuntu-latest
+
+        - target: aarch64-linux-android
+          os: ubuntu-latest
+
+        - target: aarch64-unknown-linux-gnu
+          os: ubuntu-latest
+
+        - target: aarch64-pc-windows-msvc
+          os: ubuntu-latest
+
+        - target: aarch64-apple-darwin
+          os: macos-latest
+
+        - target: armv7-unknown-linux-gnueabihf
+          os: ubuntu-latest
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Build
+        run: cargo build --target ${{ matrix.target }}
+
+      - name: Upload bindings
+        uses: actions/upload-artifact@v4
+        with: 
+          name: ${{ matrix.target }}
+          path: src/bindings_${ ${{ matrix.target }}//-/_}}.rs
+
+  zip:
+    name: Zip bindings
+    needs: [generate]
+    runs_on: ubuntu-latest
+
+    steps:
+      - name: Download x86_64-unknown-linux-gnu bindings
+        uses: actions/download-artifact@v4
+        with:
+          name: x86_64-unknown-linux-gnu
+
+      - name: Download x86_64-apple-darwin bindings
+        uses: actions/download-artifact@v4
+        with:
+          name: x86_64-apple-darwin
+
+      - name: Download x86_64-pc-windows-msvc bindings
+        uses: actions/download-artifact@v4
+        with:
+          name: x86_64-pc-windows-msvc
+
+      - name: Download aarch64-linux-android bindings
+        uses: actions/download-artifact@v4
+        with:
+          name: aarch64-linux-android
+
+      - name: Download aarch64-unknown-linux-gnu bindings
+        uses: actions/download-artifact@v4
+        with:
+          name: aarch64-unknown-linux-gnu
+
+      - name: Download aarch64-pc-windows-msvc bindings
+        uses: actions/download-artifact@v4
+        with:
+          name: aarch64-pc-windows-msvc
+
+      - name: Download aarch64-apple-darwin bindings
+        uses: actions/download-artifact@v4
+        with:
+          name: aarch64-apple-darwin
+
+      - name: Download armv7-unknown-linux-gnueabihf bindings
+        uses: actions/download-artifact@v4
+        with:
+          name: armv7-unknown-linux-gnueabihf
+
+      - name: Zip bindings
+        run: zip bindings.zip .
+
+      - name: Upload zipped bindings
+        uses: actions/upload-artifact@v4
+        with: 
+          name: bindings
+          path: bindings.zip
+        
+
