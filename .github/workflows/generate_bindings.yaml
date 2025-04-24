@@ -42,6 +42,9 @@ jobs:
         with:
           submodules: true
 
+      - name: Setup
+        run: rustup target add ${{ matrix.target }}
+        
       - name: Build
         run: cargo build --target ${{ matrix.target }}
 
