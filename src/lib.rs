@@ -390,7 +390,7 @@ pub struct Uarch {
 pub struct UarchInfo {
     #[doc = " Type of CPU microarchitecture"]
     pub uarch: Uarch,
-    #[doc = " Value of CPUID leaf 1 EAX register for the microarchitecture"]
+    #[doc = " Value of CPUID leaf 1 EAX register for the microarchitecture (x86-specific ID)"]
     pub cpuid: Option<u32>,
     #[doc = " Value of Main ID Register (MIDR) for this core (arm-specific ID)"]
     pub midr: Option<u32>,
