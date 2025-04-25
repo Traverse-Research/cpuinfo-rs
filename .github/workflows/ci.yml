@@ -77,7 +77,7 @@ jobs:
 
           - target: aarch64-apple-darwin
             os: macos-latest
-            name: Android
+            name: macOS
             cross: false
             test: true
 
