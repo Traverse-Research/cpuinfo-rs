@@ -325,7 +325,7 @@ pub struct Core {
     pub vendor: Vendor,
     #[doc = " CPU microarchitecture for this core"]
     pub uarch: Uarch,
-    #[doc = " Value of CPUID leaf 1 EAX register for this core (x86-specific ID)"]
+    #[doc = " Value of CPUID leaf 1 EAX register for this core (x86/x64-specific ID)"]
     pub cpuid: Option<u32>,
     #[doc = " Value of Main ID Register (MIDR) for this core (arm/aarch64-specific ID)"]
     pub midr: Option<u32>,
@@ -351,9 +351,9 @@ pub struct Cluster {
     pub vendor: Vendor,
     #[doc = " CPU microarchitecture of the cores in the cluster"]
     pub uarch: Uarch,
-    #[doc = " Value of CPUID leaf 1 EAX register for this core (x86-specific ID)"]
+    #[doc = " Value of CPUID leaf 1 EAX register for this core (x86/x64-specific ID)"]
     pub cpuid: Option<u32>,
-    #[doc = " Value of Main ID Register (MIDR) for this core (arm-specific ID)"]
+    #[doc = " Value of Main ID Register (MIDR) for this core (arm/aarch64-specific ID)"]
     pub midr: Option<u32>,
     #[doc = " Clock rate (non-Turbo) of the cores in the cluster, in Hz"]
     pub frequency: u64,
@@ -390,9 +390,9 @@ pub struct Uarch {
 pub struct UarchInfo {
     #[doc = " Type of CPU microarchitecture"]
     pub uarch: Uarch,
-    #[doc = " Value of CPUID leaf 1 EAX register for the microarchitecture (x86-specific ID)"]
+    #[doc = " Value of CPUID leaf 1 EAX register for the microarchitecture (x86/x64-specific ID)"]
     pub cpuid: Option<u32>,
-    #[doc = " Value of Main ID Register (MIDR) for this core (arm-specific ID)"]
+    #[doc = " Value of Main ID Register (MIDR) for this core (arm/aarch64-specific ID)"]
     pub midr: Option<u32>,
     #[doc = " Number of logical processors with the microarchitecture"]
     pub processor_count: u32,

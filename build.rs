@@ -141,6 +141,7 @@ fn generate_bindings() {
     let dest = std::env::var("OUT_DIR").unwrap();
     let dest = std::path::Path::new(&dest).join("bindings.rs");
 
+    // Use MSRV for target version.
     let Ok(version) = bindgen::RustTarget::stable(74, 0) else {
         panic!("Invalid rust target version");
     };
