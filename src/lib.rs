@@ -1,6 +1,11 @@
 #![doc = include_str!("../README.md")]
 
-mod bindings;
+mod bindings {
+    #![allow(non_upper_case_globals, non_snake_case, non_camel_case_types)]
+    #![allow(dead_code)]
+
+    include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
+}
 use bindings::*;
 
 use std::borrow::Cow;
@@ -39,9 +44,20 @@ impl CpuInfo {
         for i in 0..count {
             let uarch_info = unsafe { cpuinfo_get_uarch(i) };
             infos.push(unsafe {
+                #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+                let cpuid = Some((*uarch_info).cpuid);
+                #[cfg(all(not(target_arch = "x86_64"), not(target_arch = "x86")))]
+                let cpuid = None;
+
+                #[cfg(any(target_arch = "aarch64", target_arch = "arm"))]
+                let midr = Some((*uarch_info).midr);
+                #[cfg(all(not(target_arch = "aarch64"), not(target_arch = "arm")))]
+                let midr = None;
+
                 UarchInfo {
                     uarch: Self::uarch((*uarch_info).uarch),
-                    cpuid: (*uarch_info).cpuid,
+                    cpuid,
+                    midr,
                     processor_count: (*uarch_info).processor_count,
                     core_count: (*uarch_info).core_count,
                 }
@@ -72,6 +88,16 @@ impl CpuInfo {
     }
 
     fn cluster(cluster: *const cpuinfo_cluster, package: Arc<Package>) -> Arc<Cluster> {
+        #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+        let cpuid = Some(unsafe { (*cluster).cpuid });
+        #[cfg(all(not(target_arch = "x86_64"), not(target_arch = "x86")))]
+        let cpuid = None;
+
+        #[cfg(any(target_arch = "aarch64", target_arch = "arm"))]
+        let midr = Some(unsafe { (*cluster).midr });
+        #[cfg(all(not(target_arch = "aarch64"), not(target_arch = "arm")))]
+        let midr = None;
+
         Arc::new(unsafe {
             Cluster {
                 processor_start: (*cluster).processor_start,
@@ -82,7 +108,8 @@ impl CpuInfo {
                 package: package.clone(),
                 vendor: Self::vendor((*cluster).vendor),
                 uarch: Self::uarch((*cluster).uarch),
-                cpuid: (*cluster).cpuid,
+                cpuid,
+                midr,
                 frequency: (*cluster).frequency,
             }
         })
@@ -96,6 +123,16 @@ impl CpuInfo {
     }
 
     fn core(core: *const cpuinfo_core, cluster: Arc<Cluster>, package: Arc<Package>) -> Arc<Core> {
+        #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+        let cpuid = Some(unsafe { (*core).cpuid });
+        #[cfg(all(not(target_arch = "x86_64"), not(target_arch = "x86")))]
+        let cpuid = None;
+
+        #[cfg(any(target_arch = "aarch64", target_arch = "arm"))]
+        let midr = Some(unsafe { (*core).midr });
+        #[cfg(all(not(target_arch = "aarch64"), not(target_arch = "arm")))]
+        let midr = None;
+
         Arc::new(unsafe {
             Core {
                 processor_start: (*core).processor_start,
@@ -105,7 +142,8 @@ impl CpuInfo {
                 package,
                 vendor: Self::vendor((*core).vendor),
                 uarch: Self::uarch((*core).uarch),
-                cpuid: (*core).cpuid,
+                cpuid,
+                midr,
                 frequency: (*core).frequency,
             }
         })
@@ -169,15 +207,36 @@ impl CpuInfo {
                 package.clone(),
             );
 
+            #[cfg(target_os = "linux")]
+            let linux_id = Some(unsafe { (*processor).linux_id });
+            #[cfg(not(target_os = "linux"))]
+            let linux_id = None;
+
+            #[cfg(target_os = "windows")]
+            let (windows_group_id, windows_processor_id) = {
+                (
+                    Some(unsafe { (*processor).windows_group_id }),
+                    Some(unsafe { (*processor).windows_processor_id }),
+                )
+            };
+            #[cfg(not(target_os = "windows"))]
+            let (windows_group_id, windows_processor_id) = (None, None);
+
+            #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+            let apic_id = Some(unsafe { (*processor).apic_id });
+            #[cfg(all(not(target_arch = "x86_64"), not(target_arch = "x86")))]
+            let apic_id = None;
+
             processors.push(unsafe {
                 Processor {
                     smt_id: (*processor).smt_id,
                     core,
                     cluster,
                     package,
-                    windows_group_id: (*processor).windows_group_id,
-                    windows_processor_id: (*processor).windows_processor_id,
-                    apic_id: (*processor).apic_id,
+                    linux_id,
+                    windows_group_id,
+                    windows_processor_id,
+                    apic_id,
                     cache: Self::cache_info(&(*processor).cache),
                 }
             })
@@ -218,12 +277,14 @@ pub struct Processor {
     pub cluster: Arc<Cluster>,
     #[doc = " Physical package containing this logical processor"]
     pub package: Arc<Package>,
+    #[doc = " Linux-specific ID for the logical processor:\n - Linux kernel exposes information about this logical processor in /sys/devices/system/cpu/cpu<linux_id>/ \n - Bit <linux_id> in the cpu_set_t identifies this logical processor"]
+    pub linux_id: Option<i32>,
     #[doc = " Windows-specific ID for the group containing the logical processor."]
-    pub windows_group_id: u16,
+    pub windows_group_id: Option<u16>,
     #[doc = " Windows-specific ID of the logical processor within its group:\n - Bit <windows_processor_id> in the KAFFINITY mask identifies this\n logical processor within its group."]
-    pub windows_processor_id: u16,
+    pub windows_processor_id: Option<u16>,
     #[doc = " APIC ID (unique x86-specific ID of the logical processor)"]
-    pub apic_id: u32,
+    pub apic_id: Option<u32>,
     pub cache: CacheInfo,
 }
 
@@ -264,8 +325,10 @@ pub struct Core {
     pub vendor: Vendor,
     #[doc = " CPU microarchitecture for this core"]
     pub uarch: Uarch,
-    #[doc = " Value of CPUID leaf 1 EAX register for this core"]
-    pub cpuid: u32,
+    #[doc = " Value of CPUID leaf 1 EAX register for this core (x86/x64-specific ID)"]
+    pub cpuid: Option<u32>,
+    #[doc = " Value of Main ID Register (MIDR) for this core (arm/aarch64-specific ID)"]
+    pub midr: Option<u32>,
     #[doc = " Clock rate (non-Turbo) of the core, in Hz"]
     pub frequency: u64,
 }
@@ -288,8 +351,10 @@ pub struct Cluster {
     pub vendor: Vendor,
     #[doc = " CPU microarchitecture of the cores in the cluster"]
     pub uarch: Uarch,
-    #[doc = " Value of CPUID leaf 1 EAX register of the cores in the cluster"]
-    pub cpuid: u32,
+    #[doc = " Value of CPUID leaf 1 EAX register for this core (x86/x64-specific ID)"]
+    pub cpuid: Option<u32>,
+    #[doc = " Value of Main ID Register (MIDR) for this core (arm/aarch64-specific ID)"]
+    pub midr: Option<u32>,
     #[doc = " Clock rate (non-Turbo) of the cores in the cluster, in Hz"]
     pub frequency: u64,
 }
@@ -325,8 +390,10 @@ pub struct Uarch {
 pub struct UarchInfo {
     #[doc = " Type of CPU microarchitecture"]
     pub uarch: Uarch,
-    #[doc = " Value of CPUID leaf 1 EAX register for the microarchitecture"]
-    pub cpuid: u32,
+    #[doc = " Value of CPUID leaf 1 EAX register for the microarchitecture (x86/x64-specific ID)"]
+    pub cpuid: Option<u32>,
+    #[doc = " Value of Main ID Register (MIDR) for this core (arm/aarch64-specific ID)"]
+    pub midr: Option<u32>,
     #[doc = " Number of logical processors with the microarchitecture"]
     pub processor_count: u32,
     #[doc = " Number of cores with the microarchitecture"]

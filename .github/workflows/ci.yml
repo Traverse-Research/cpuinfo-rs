@@ -1,6 +1,7 @@
+name: CI
+
 on:
   push:
-  pull_request:
 
 jobs:
   rust:
@@ -14,8 +15,6 @@ jobs:
         run: cargo fmt --all -- --check
       - name: Cargo clippy
         run: cargo clippy --workspace --all-targets -- -D warnings
-      - name: Cargo test
-        run: cargo test --workspace
 
   rust-msrv:
     name: Build-test MSRV (1.74) with minimal crate dependencies
@@ -30,6 +29,90 @@ jobs:
       - uses: dtolnay/rust-toolchain@nightly
       - name: Generate minimal-version dependencies
         run: cargo -Zminimal-versions generate-lockfile
+      # The latest bindgen release has an underspecified proc-macro2 dependency: https://github.com/rust-lang/rust-bindgen/issues/3149
+      - name: Update proc-macro2 to 1.0.80
+        run: cargo update -p proc-macro2 --precise 1.0.80
       - uses: dtolnay/rust-toolchain@1.74.0
       - name: Cargo check
         run: cargo check --workspace --all-targets
+
+  cross:
+    name: ${{ matrix.name }} (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+    env:
+      PROGRAM: ${{ matrix.cross && 'cross' || 'cargo' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            name: Linux
+            cross: false
+            test: true
+
+          - target: x86_64-apple-darwin
+            os: macos-latest
+            name: macOS
+            cross: false
+            test: true
+
+          - os: windows-latest
+            name: Windows
+            target: x86_64-pc-windows-msvc
+            cross: false
+            test: true
+
+          # - os: ubuntu-latest
+          #   name: FreeBSD
+          #   target: x86_64-unknown-freebsd
+          #   cross: true
+          #   test: false
+
+          - target: aarch64-linux-android
+            os: ubuntu-latest
+            name: Android
+            cross: true
+            test: true
+
+          # - os: ubuntu-latest
+          #   name: OpenWrt
+          #   target: aarch64-unknown-linux-gnu
+          #   cross: true
+          #   test: true
+          #   cargo_args: --features "openwrt"
+
+          # - target: armv7-unknown-linux-gnueabihf
+          #   os: ubuntu-latest
+          #   name: Linux ARMv7
+          #   cross: true
+          #   test: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          
+      - name: Bootstrap
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install cross
+        run: cargo install cross
+        if: ${{ matrix.cross }}
+
+      - name: Build
+        run: ${{ env.PROGRAM }} build --target=${{ matrix.target }} ${{ matrix.cargo_args }}
+
+      - name: Test
+        run: ${{ env.PROGRAM }} test --target=${{ matrix.target }} ${{ matrix.cargo_args }}
+        if: ${{ matrix.test }}
+      
+      - name: Run example
+        run: cargo run --example info
+      - uses: actions/upload-artifact@v4
+        with:
+          name: info-${{ matrix.target }}
+          path: info.txt
