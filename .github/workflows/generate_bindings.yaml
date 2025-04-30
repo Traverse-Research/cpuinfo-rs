@@ -58,6 +58,7 @@ jobs:
 
       - name: Set bindings path
         id: bindings
+        shell: bash
         run: |
           target="${{ matrix.target }}"
           path="src/bindings_${target//-/_}.rs"
