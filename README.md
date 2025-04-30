@@ -1,4 +1,4 @@
-# cpuinfo-rs title
+# cpuinfo-rs
 
 [![Actions Status](https://github.com/Traverse-Research/cpuinfo-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/Traverse-Research/cpuinfo-rs/actions)
 [![Latest version](https://img.shields.io/crates/v/cpuinfo-rs.svg?logo=rust)](https://crates.io/crates/cpuinfo-rs)
