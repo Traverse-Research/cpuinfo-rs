@@ -60,7 +60,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bindings-${{ matrix.target }}
-          path: src/bindings-${{ matrix.target }}.rs
+          path: src/bindings_${{ replace(matrix.target, '-', '_') }}.rs
 
   zip-bindings:
     name: Zip bindings
