@@ -1,0 +1,103 @@
+name: Generate bindings
+
+on:
+  push:
+
+jobs:
+  generate-bindigs:
+    name: Generate bindings
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu 
+            name: Linux AMD64
+            os: ubuntu-latest  
+            cross: false
+
+          - target: x86_64-apple-darwin 
+            name: macOS AMD64
+            os: macos-latest
+            cross: false
+
+          - target: x86_64-pc-windows-msvc 
+            name: Windows AMD64
+            os: windows-latest
+            cross: false
+
+          - target: aarch64-apple-darwin
+            name: macOS ARM64
+            os: macos-latest
+            cross: false
+
+          - target: aarch64-linux-android
+            name: Android
+            os: ubuntu-latest  
+            cross: true
+
+    runs-on: ${{ matrix.os }}   
+    env:
+      PROGRAM: ${{ matrix.cross && 'cross' || 'cargo' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Bootstrap
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install cross
+        run: cargo install cross
+        if: ${{ matrix.cross }}
+
+      - name: Build
+        run: ${{ env.PROGRAM }} build --target=${{ matrix.target }} --features=generate-bindings
+
+      - name: Upload bindings
+        uses: actions/upload-artifact@v4
+        with:
+          name: bindings-${{ matrix.target }}
+          path: src/bindings-${{ matrix.target }}.rs
+
+  zip-bindings:
+    name: Zip bindings
+    needs: [generate-bindigs]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download bindings x86_64-unknown-linux-gnu 
+        uses: actions/download-artifact@v4
+        with:
+          name: bindings-x86_64-unknown-linux-gnu
+
+      - name: Download bindings x86_64-apple-darwin  
+        uses: actions/download-artifact@v4
+        with:
+          name: bindings-x86_64-apple-darwin 
+
+      - name: Download bindings x86_64-pc-windows-msvc   
+        uses: actions/download-artifact@v4
+        with:
+          name: bindings-x86_64-pc-windows-msvc 
+
+      - name: Download bindings aarch64-apple-darwin   
+        uses: actions/download-artifact@v4
+        with:
+          name: bindings-aarch64-apple-darwin 
+
+      - name: Download bindings aarch64-linux-android
+        uses: actions/download-artifact@v4
+        with:
+          name: bindings-aarch64-linux-android
+  
+      - name: Zip bindings
+        run: zip bindings.zip *
+
+      - name: Upload bindings
+        uses: actions/upload-artifact@v4
+        with:
+          name: bindings
+          path: bindings.zip
+

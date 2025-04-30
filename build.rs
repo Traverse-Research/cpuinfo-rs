@@ -134,12 +134,12 @@ fn main() {
 
     build.compile("cpuinfo");
 
-    generate_bindings();
+    generate_bindings(target.as_str());
 }
 
-fn generate_bindings() {
-    let dest = std::env::var("OUT_DIR").unwrap();
-    let dest = std::path::Path::new(&dest).join("bindings.rs");
+#[cfg(feature = "generate-bindings")]
+fn generate_bindings(target: &str) {
+    let dest = format!("src/bindings-{target}.rs");
 
     // Use MSRV for target version.
     let Ok(version) = bindgen::RustTarget::stable(74, 0) else {
@@ -158,3 +158,6 @@ fn generate_bindings() {
         .write_to_file(dest)
         .expect("Unable to write bindings!");
 }
+
+#[cfg(not(feature = "generate-bindings"))]
+fn generate_bindings(_target: &str) {}
