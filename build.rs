@@ -140,7 +140,7 @@ fn main() {
 #[cfg(feature = "generate-bindings")]
 fn generate_bindings(target: &str) {
     let dest = format!("src/bindings_{target}.rs");
-    let dest = target.to_lowercase();
+    let dest = dest.replace("-", "_");
 
     // Use MSRV for target version.
     let Ok(version) = bindgen::RustTarget::stable(74, 0) else {
