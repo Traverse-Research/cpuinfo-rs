@@ -56,11 +56,18 @@ jobs:
       - name: Build
         run: ${{ env.PROGRAM }} build --target=${{ matrix.target }} --features=generate-bindings
 
+      - name: Set bindings path
+        id: bindings
+        run: |
+          target="${{ matrix.target }}"
+          path="src/bindings_${target//-/_}.rs"
+          echo "path=$path" >> $GITHUB_OUTPUT
+
       - name: Upload bindings
         uses: actions/upload-artifact@v4
         with:
           name: bindings-${{ matrix.target }}
-          path: src/bindings_${{ replace(matrix.target, '-', '_') }}.rs
+          path: ${{ steps.bindings.outputs.path }}
 
   zip-bindings:
     name: Zip bindings
