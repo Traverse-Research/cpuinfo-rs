@@ -63,12 +63,6 @@ jobs:
             cross: false
             test: true
 
-          - os: windows-latest
-            name: Windows AARCH64
-            target: aarch64-pc-windows-msvc
-            cross: true
-            test: true
-
           # Disabled because u_int is undefined in freebsd headers
           # - os: ubuntu-latest
           #   name: FreeBSD
@@ -112,16 +106,6 @@ jobs:
         # cross-compile and run tests on.
         run: cargo install cross --git https://github.com/cross-rs/cross
         if: ${{ matrix.cross }}
-
-      - name: Build aarch64-pc-windows-msvc Docker image
-        # https://github.com/cross-rs/cross-toolchains/issues/32
-        if: ${{ matrix.target == 'aarch64-pc-windows-msvc' }}
-        run: |
-          # https://github.com/cross-rs/cross/pull/1672
-          git clone https://github.com/cross-rs/cross --recurse-submodules --revision 359863badc32b9b2995d304b8ef74a36a426488f
-          cd cross
-          # cargo xtask configure-crosstool ${{ matrix.target }}
-          cargo build-docker-image --platform windows/amd64 ${{ matrix.target }}-cross --tag local
 
       - name: Build
         run: ${{ env.PROGRAM }} build --target=${{ matrix.target }}
