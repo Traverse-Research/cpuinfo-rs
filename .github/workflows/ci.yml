@@ -70,6 +70,12 @@ jobs:
           #   cross: true
           #   test: false
 
+          - target: aarch64-apple-darwin
+            os: macos-latest
+            name: macOS
+            cross: false
+            test: true
+
           - os: ubuntu-latest
             name: Android
             target: aarch64-linux-android
