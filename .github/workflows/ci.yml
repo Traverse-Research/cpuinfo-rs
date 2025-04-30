@@ -70,9 +70,9 @@ jobs:
           #   cross: true
           #   test: false
 
-          - target: aarch64-apple-darwin
-            os: macos-latest
+          - os: macos-latest
             name: macOS
+            target: aarch64-apple-darwin
             cross: false
             test: true
 
