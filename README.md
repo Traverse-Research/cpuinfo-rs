@@ -16,7 +16,7 @@ Add this to your Cargo.toml:
 
 ```toml
 [dependencies]
-cpuinfo-rs = "0.6.0"
+cpuinfo-rs = "0.7.0"
 ```
 
 ```rust
