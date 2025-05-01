@@ -24,6 +24,11 @@ jobs:
             os: windows-latest
             cross: false
 
+          - target: aarch64-pc-windows-msvc
+            name: Windows ARM64
+            os: windows-latest
+            cross: false
+
           - target: aarch64-apple-darwin
             name: macOS ARM64
             os: macos-latest
@@ -90,6 +95,11 @@ jobs:
         with:
           name: bindings-x86_64-pc-windows-msvc 
 
+      - name: Download bindings aarch64-pc-windows-msvc  
+        uses: actions/download-artifact@v4
+        with:
+          name: bindings-aarch64-pc-windows-msvc
+
       - name: Download bindings aarch64-apple-darwin   
         uses: actions/download-artifact@v4
         with:
@@ -100,12 +110,9 @@ jobs:
         with:
           name: bindings-aarch64-linux-android
   
-      - name: Zip bindings
-        run: zip bindings.zip *
-
       - name: Upload bindings
         uses: actions/upload-artifact@v4
         with:
           name: bindings
-          path: bindings.zip
+          path: .
 
