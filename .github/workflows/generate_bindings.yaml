@@ -8,17 +8,17 @@ jobs:
     strategy:
       matrix:
         include:
-          - target: x86_64-unknown-linux-gnu 
+          - target: x86_64-unknown-linux-gnu
             name: Linux AMD64
-            os: ubuntu-latest  
+            os: ubuntu-latest
             cross: false
 
-          - target: x86_64-apple-darwin 
+          - target: x86_64-apple-darwin
             name: macOS AMD64
             os: macos-latest
             cross: false
 
-          - target: x86_64-pc-windows-msvc 
+          - target: x86_64-pc-windows-msvc
             name: Windows AMD64
             os: windows-latest
             cross: false
@@ -35,10 +35,10 @@ jobs:
 
           - target: aarch64-linux-android
             name: Android
-            os: ubuntu-latest  
+            os: ubuntu-latest
             cross: true
 
-    runs-on: ${{ matrix.os }}   
+    runs-on: ${{ matrix.os }}
     env:
       PROGRAM: ${{ matrix.cross && 'cross' || 'cargo' }}
 
@@ -79,39 +79,38 @@ jobs:
     needs: [generate-bindigs]
     runs-on: ubuntu-latest
     steps:
-      - name: Download bindings x86_64-unknown-linux-gnu 
+      - name: Download bindings x86_64-unknown-linux-gnu
         uses: actions/download-artifact@v4
         with:
           name: bindings-x86_64-unknown-linux-gnu
 
-      - name: Download bindings x86_64-apple-darwin  
+      - name: Download bindings x86_64-apple-darwin
         uses: actions/download-artifact@v4
         with:
-          name: bindings-x86_64-apple-darwin 
+          name: bindings-x86_64-apple-darwin
 
-      - name: Download bindings x86_64-pc-windows-msvc   
+      - name: Download bindings x86_64-pc-windows-msvc
         uses: actions/download-artifact@v4
         with:
-          name: bindings-x86_64-pc-windows-msvc 
+          name: bindings-x86_64-pc-windows-msvc
 
-      - name: Download bindings aarch64-pc-windows-msvc  
+      - name: Download bindings aarch64-pc-windows-msvc
         uses: actions/download-artifact@v4
         with:
           name: bindings-aarch64-pc-windows-msvc
 
-      - name: Download bindings aarch64-apple-darwin   
+      - name: Download bindings aarch64-apple-darwin
         uses: actions/download-artifact@v4
         with:
-          name: bindings-aarch64-apple-darwin 
+          name: bindings-aarch64-apple-darwin
 
       - name: Download bindings aarch64-linux-android
         uses: actions/download-artifact@v4
         with:
           name: bindings-aarch64-linux-android
-  
+
       - name: Upload bindings
         uses: actions/upload-artifact@v4
         with:
           name: bindings
           path: .
-
