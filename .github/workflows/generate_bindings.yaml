@@ -1,7 +1,6 @@
 name: Generate bindings
 
-on: 
-  push:
+on: workflow_dispatch
 
 jobs:
   generate-bindigs:
