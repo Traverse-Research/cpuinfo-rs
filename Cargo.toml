@@ -12,6 +12,10 @@ categories = ["hardware-support"] # https://crates.io/category_slugs
 keywords = []
 rust-version = "1.74"
 
+
+[features]
+generate-bindings = ["dep:bindgen"]
+
 [dependencies]
 bytemuck = "1"
 serde = { version = "1", features = ["derive", "rc"] }
@@ -20,5 +24,5 @@ serde = { version = "1", features = ["derive", "rc"] }
 serde_json = "1"
 
 [build-dependencies]
-bindgen = "0.71"
+bindgen = { version = "0.71", optional = true }
 cc = "1.1"

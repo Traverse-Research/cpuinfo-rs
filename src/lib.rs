@@ -1,17 +1,39 @@
 #![doc = include_str!("../README.md")]
 
-mod bindings {
-    #![allow(non_upper_case_globals, non_snake_case, non_camel_case_types)]
-    #![allow(dead_code)]
-
-    include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
-}
-use bindings::*;
-
 use std::borrow::Cow;
 use std::sync::{Arc, Once};
 
 static INITIALIZED: Once = Once::new();
+
+#[cfg(all(target_os = "windows", target_arch = "x86_64"))]
+mod bindings_x86_64_pc_windows_msvc;
+#[cfg(all(target_os = "windows", target_arch = "x86_64"))]
+use bindings_x86_64_pc_windows_msvc::*;
+
+#[cfg(all(target_os = "linux", target_arch = "x86_64"))]
+mod bindings_x86_64_unknown_linux_gnu;
+#[cfg(all(target_os = "linux", target_arch = "x86_64"))]
+use bindings_x86_64_unknown_linux_gnu::*;
+
+#[cfg(all(target_os = "macos", target_arch = "x86_64"))]
+mod bindings_x86_64_apple_darwin;
+#[cfg(all(target_os = "macos", target_arch = "x86_64"))]
+use bindings_x86_64_apple_darwin::*;
+
+#[cfg(all(target_os = "windows", target_arch = "aarch64"))]
+mod bindings_aarch64_pc_windows_msvc;
+#[cfg(all(target_os = "windows", target_arch = "aarch64"))]
+use bindings_aarch64_pc_windows_msvc::*;
+
+#[cfg(all(target_os = "macos", target_arch = "aarch64"))]
+mod bindings_aarch64_apple_darwin;
+#[cfg(all(target_os = "macos", target_arch = "aarch64"))]
+use bindings_aarch64_apple_darwin::*;
+
+#[cfg(all(target_os = "android", target_arch = "aarch64"))]
+mod bindings_aarch64_linux_android;
+#[cfg(all(target_os = "android", target_arch = "aarch64"))]
+use bindings_aarch64_linux_android::*;
 
 pub struct CpuInfo;
 

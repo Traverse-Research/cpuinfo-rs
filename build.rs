@@ -134,12 +134,13 @@ fn main() {
 
     build.compile("cpuinfo");
 
-    generate_bindings();
+    generate_bindings(target.as_str());
 }
 
-fn generate_bindings() {
-    let dest = std::env::var("OUT_DIR").unwrap();
-    let dest = std::path::Path::new(&dest).join("bindings.rs");
+#[cfg(feature = "generate-bindings")]
+fn generate_bindings(target: &str) {
+    let dest = format!("src/bindings_{target}.rs");
+    let dest = dest.replace("-", "_");
 
     // Use MSRV for target version.
     let Ok(version) = bindgen::RustTarget::stable(74, 0) else {
@@ -148,6 +149,8 @@ fn generate_bindings() {
 
     let bindings = bindgen::Builder::default()
         .header("vendor/cpuinfo/include/cpuinfo.h")
+        .raw_line("#![allow(non_upper_case_globals, non_snake_case, non_camel_case_types)]")
+        .raw_line("#![allow(dead_code)]")
         .clang_args(&["-xc++", "-std=c++11"])
         .layout_tests(false)
         .rust_target(version)
@@ -158,3 +161,6 @@ fn generate_bindings() {
         .write_to_file(dest)
         .expect("Unable to write bindings!");
 }
+
+#[cfg(not(feature = "generate-bindings"))]
+fn generate_bindings(_target: &str) {}
