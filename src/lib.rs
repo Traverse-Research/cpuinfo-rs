@@ -30,6 +30,11 @@ mod bindings_aarch64_apple_darwin;
 #[cfg(all(target_os = "macos", target_arch = "aarch64"))]
 use bindings_aarch64_apple_darwin::*;
 
+#[cfg(all(target_os = "ios", target_arch = "aarch64"))]
+mod bindings_aarch64_apple_ios;
+#[cfg(all(target_os = "ios", target_arch = "aarch64"))]
+use bindings_aarch64_apple_ios::*;
+
 #[cfg(all(target_os = "android", target_arch = "aarch64"))]
 mod bindings_aarch64_linux_android;
 #[cfg(all(target_os = "android", target_arch = "aarch64"))]
