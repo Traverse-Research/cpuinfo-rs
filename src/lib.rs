@@ -98,7 +98,7 @@ impl CpuInfo {
         Arc::new(unsafe {
             Package {
                 name: std::ffi::CStr::from_bytes_until_nul(bytemuck::cast_slice(
-                    &(*package).name[..],
+                    &(&(*package).name)[..],
                 ))
                 .unwrap()
                 .to_str()
